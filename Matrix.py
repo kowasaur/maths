@@ -121,6 +121,12 @@ class Matrix:
         new_elements = [row[:column - 1] + row[column:] for row in self.elements]
         return Matrix(*new_elements)
 
+    def transpose(self):
+        new_elements = [tuple(
+            self.elements[r][c] for r in range(0, self.rows)
+        ) for c in range(0, self.columns)]
+        return Matrix(*new_elements)
+
     #region Special Matrices
 
     def zero(self):
@@ -156,4 +162,4 @@ a = Matrix(
     (5, 2),
     (3, 4)
 )
-print(s.determinant())
+print(s.determinant() == s.transpose().determinant()) # True
