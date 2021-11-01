@@ -1,6 +1,6 @@
-from operator import add, sub
+from operator import add, sub, mul
 from functools import reduce
-from typing import Union
+from typing import SupportsRound, Union
 
 Number = Union[float, int]
 
@@ -59,6 +59,12 @@ class Matrix:
             self.elements, other.elements
         ))
 
+    # Affect every element in the matrix by a function
+    def affect_elements(self, func: "function", *args):
+        return Matrix(*[tuple(
+            func(column, *args) for column in row
+        ) for row in self.elements])
+
     def __add__(self, other: "Matrix"):
         return self._combine(other, add)
 
@@ -66,13 +72,16 @@ class Matrix:
         return self._combine(other, sub)
 
     def __mul__(self, scalar: float):
-        return Matrix(*tmap(
-            lambda rows: tmap(lambda e: e * scalar, rows),
-            self.elements
-        ))
+        return self.affect_elements(mul, scalar)
 
     def __rmul__(self, other: float):
         return self * other
+
+    def __pow__(self, scalar: float):
+        result = self
+        for _ in range(1, scalar):
+            result @= self
+        return result
 
     # @ operator
     def __matmul__(self, other: "Matrix"):
@@ -84,6 +93,9 @@ class Matrix:
             ),
             range(1, self.rows + 1)
         ))
+
+    def __round__(self, n: SupportsRound = None):
+        return self.affect_elements(round, n)
 
     def determinant(self) -> Number:
         assert self.isSquare, "Determinant of non square does not exist"
@@ -141,25 +153,25 @@ class Matrix:
 
     #endregion
 
+if __name__ == "__main__":
+    m = Matrix(
+        (2, 3, 7), 
+        (4, 5, 3)
+    )
+    n = Matrix(
+        (1, 2),
+        (3, 4),
+        (6, 4)
+    )
+    s = Matrix(
+        (2, 1, 5, 2),
+        (5, 2, 3, 2),
+        (8, 3, 4, 2),
+        (8, 3, 4, 4)
+    )
 
-m = Matrix(
-    (2, 3, 7), 
-    (4, 5, 3)
-)
-n = Matrix(
-    (1, 2),
-    (3, 4),
-    (6, 4)
-)
-s = Matrix(
-    (2, 1, 5, 2),
-    (5, 2, 3, 2),
-    (8, 3, 4, 2),
-    (8, 3, 4, 4)
-)
-
-a = Matrix(
-    (5, 2),
-    (3, 4)
-)
-print(s.determinant() == s.transpose().determinant()) # True
+    a = Matrix(
+        (5, 2),
+        (3, 4)
+    )
+    print(a * 2)
