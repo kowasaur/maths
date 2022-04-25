@@ -77,7 +77,16 @@ class Matrix:
     def __rmul__(self, other: float):
         return self * other
 
-    def __pow__(self, scalar: float):
+    def __pow__(self, scalar: int):
+        assert scalar >= -1, "Not implemented"
+        if scalar == 0: 
+            return self.identity()
+        elif scalar == -1:
+            assert self.order == "2 x 2", "Not implemented"
+            a, b = self.elements[0]
+            c, d = self.elements[1]
+            return (1 / (a * d - b * c)) * Matrix((d, -b), (-c, a))
+
         result = self
         for _ in range(1, scalar):
             result @= self
